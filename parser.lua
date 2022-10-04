@@ -1,5 +1,7 @@
+--Quick and dirty way to distinguish types of operators
 local BINARY_LEFT = 1
 local BINARY_RIGHT = 2
+--No operations for these defined at the moment
 local UNARY_PRE = 3
 local UNARY_POST = 4
 
@@ -9,10 +11,9 @@ local operators = {
     ["+"] = {priority=3, type=BINARY_LEFT},
     ["-"] = {priority=3, type=BINARY_LEFT},
     ["^"] = {priority=1, type=BINARY_RIGHT},
-    ["!"] = {priority=0, type=UNARY_POST},
 }
 
---Better, but still no function tokens
+--Version of Djikstra's shunting yard algorithm
 function InfixtoPostfix(str)
     local expr = ParseElements(str)
 
@@ -55,7 +56,7 @@ function InfixtoPostfix(str)
     return output
 end
 
---Parses the string into tokens that include numbers, brackets, and operators
+--Parses the string into tokens that include numbers, variables, brackets, and operators
 function ParseElements(str)
     local expr = {''}
     --Convert string into a table of each entity
@@ -82,7 +83,6 @@ function ParseElements(str)
 
     return expr
 end
-
 
 function IsOperator(c)
     local operators = {"+", "-", "*", "/", "^", "(", ")"}
