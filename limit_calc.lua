@@ -1,3 +1,7 @@
+--TODO: All operators of equal precedence are evaluated right to left
+--Basically fix this with the modified shunting alg when I add other operatiosn
+
+
 require 'parser'
 require 'evaluation'
 
@@ -10,13 +14,14 @@ local expr = io.read()
 --Convert expression to a postfix notation table
 local postfixExpr = InfixtoPostfix(expr)
 
---https://www.chris-j.co.uk/parsing.php
-
 --Receive user input for whatever the limit is
 print("Enter the value at which to evaluate the limit:")
-local n = io.read().tonumber()
+local n = tonumber(io.read())
 
 --Evaluate the limit
+EvaluatePostfixLimit(postfixExpr, n)
+
+
     --Try to straight up evaluate at the limit
     --If there is an error
         --Evaluate from either side

@@ -1,4 +1,18 @@
---Takes an input string that is an infix expression, and parses it into postfix
+local BINARY_LEFT = 1
+local BINARY_RIGHT = 2
+local UNARY_PRE = 3
+local UNARY_POST = 4
+
+local operators = {
+    ["*"] = {priority=2, type=BINARY_LEFT},
+    ["/"] = {priority=2, type=BINARY_LEFT},
+    ["+"] = {priority=3, type=BINARY_LEFT},
+    ["-"] = {priority=3, type=BINARY_LEFT},
+    ["^"] = {priority=1, type=BINARY_RIGHT},
+    ["!"] = {priority=0, type=UNARY_POST},
+}
+
+--Better, but still no function tokens
 function InfixtoPostfix(str)
     local expr = ParseElements(str)
 
@@ -13,17 +27,23 @@ function InfixtoPostfix(str)
                 output[#output+1] = table.remove(stack)
             end
             table.remove(stack)
-        elseif IsOperator(e) then
-            --Right now we're only worried about * and / being more important than + and -
-            if e == "*" or e=="/" then
-                table.insert(stack, e)
-            else
-                while stack[#stack] == "*" or stack[#stack] == "/" do
+        elseif operators[e] then
+            if operators[e].type==BINARY_LEFT then
+                while operators[stack[#stack]] and operators[stack[#stack]].priority <= operators[e].priority do
                     output[#output+1] = table.remove(stack)
                 end
-                table.insert(stack, e)
+
+                stack[#stack+1] = e
+            elseif operators[e].type == BINARY_RIGHT then
+                while operators[stack[#stack]] and operators[stack[#stack]].priority < operators[e].priority do
+                    output[#output+1] = table.remove(stack)
+                end
+
+                stack[#stack+1] = e
+            elseif operators[e].type == UNARY_POST then
+                output[#output+1] = e
             end
-        else --Number or variable
+        else --Operand
             output[#output+1] = e
         end
     end
@@ -35,8 +55,9 @@ function InfixtoPostfix(str)
     return output
 end
 
+--Parses the string into tokens that include numbers, brackets, and operators
 function ParseElements(str)
-    local expr = {}
+    local expr = {''}
     --Convert string into a table of each entity
     for i = 1, #str do
         local c = string.sub(str, i, i)
@@ -64,7 +85,7 @@ end
 
 
 function IsOperator(c)
-    local operators = {"+", "-", "*", "/", "(", ")"}
+    local operators = {"+", "-", "*", "/", "^", "(", ")"}
     for _, o in ipairs(operators) do
         if c == o then
             return true
